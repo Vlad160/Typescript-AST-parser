@@ -50,7 +50,7 @@ export class ImportsParser implements IPlugin {
 
     parseNamespaceImport(node: ts.ImportDeclaration): void {
         let packageName = <ts.StringLiteral>node.moduleSpecifier;
-        const alias = (node.importClause.namedBindings as ts.NamespaceImport).name as ts.Identifier;
+        const alias = <ts.Identifier>(<ts.NamespaceImport>node.importClause.namedBindings).name;
         this.packageController.addComponentToMap({
             componentName: alias.text,
             packageName: packageName.text,

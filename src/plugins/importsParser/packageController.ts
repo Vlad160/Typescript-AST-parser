@@ -44,14 +44,13 @@ export class PackageController {
         this.packageMap[component.packageName].push(component);
     }
 
-    //TODO remove any
-    getComponentOrUndefinedFromMap(componentName: string): any | undefined {
+    getComponentOrUndefinedFromMap(componentName: string): IImportComponent | undefined {
         if (this.mapper.hasOwnProperty(componentName)) {
             return this.mapper[componentName];
         }
     }
 
-    //TODO don't use console.log for print
+    //TODO don't use console.log for print. Make it solid, mb use fp
     print() {
         console.log(JSON.stringify(this.packageMap, undefined, 4))
     }

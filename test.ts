@@ -1,7 +1,5 @@
-import { readFileSync, writeFile } from 'fs';
+import { readFileSync } from 'fs';
 import * as ts from 'typescript';
-
-import { writeFile as write } from 'fs';
 
 export function delit(sourceFile: ts.SourceFile) {
 
@@ -36,3 +34,4 @@ interface Foo {
 const b: Foo = { a: 'a' };
 
 const node: ts.NodeArray<ts.Node> = [];
+export let testVar: string = 'some shit';
