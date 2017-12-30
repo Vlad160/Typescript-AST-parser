@@ -28,9 +28,9 @@ export class ExportsController {
     }
 
     print(): string {
-        const report: any = {};
+        const report: any = { exports: [] };
         this.exportsMap.forEach((value, key) => {
-            report[key] = value;
+            report.exports.push({ [key]: value });
         });
         return JSON.stringify(report, undefined, 4);
 
