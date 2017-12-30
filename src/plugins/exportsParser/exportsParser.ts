@@ -1,6 +1,6 @@
 import {
-    FunctionDeclaration, getLineAndCharacterOfPosition, Identifier, Node, NodeFlags, SourceFile, SyntaxKind,
-    VariableStatement
+    CallExpression, FunctionDeclaration, getLineAndCharacterOfPosition, Identifier, Node, NodeFlags, SourceFile,
+    SyntaxKind, VariableStatement
 } from 'typescript'
 import { IPlugin } from '../IPlugin';
 import { ExportsController, IFunctionExport, IVariableExport } from './exportsController';
@@ -48,6 +48,10 @@ export class ExportsParser implements IPlugin {
             file: this.sourceFile.fileName,
             line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
         };
+        node.decorators.forEach(value => {
+            console.log((<Identifier>(<CallExpression>value.expression).expression).text);
+            console.log((<CallExpression>value.expression).arguments)
+        });
         this.exportsController.addDeclarationToMap(functionDeclaration)
     }
 

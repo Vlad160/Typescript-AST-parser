@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import * as ts from 'typescript';
 
+@CustomDecorator('hui')
 export function delit(sourceFile: ts.SourceFile) {
 
     delintNode(sourceFile);
