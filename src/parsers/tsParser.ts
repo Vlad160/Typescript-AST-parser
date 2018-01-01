@@ -17,8 +17,8 @@ export class TsParser {
 
     traverse() {
         this.parseNode(this.sourceFile);
-        // this.importsParser.print();
-        // this.exportsParser.print();
+        this.importsParser.print();
+        this.exportsParser.print();
     }
 
     parseNode(node: ts.Node) {

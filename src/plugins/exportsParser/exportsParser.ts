@@ -1,9 +1,12 @@
 import {
-    CallExpression, FunctionDeclaration, getLineAndCharacterOfPosition, Identifier, Node, NodeFlags, SourceFile,
-    SyntaxKind, VariableStatement
+    ClassDeclaration, EnumDeclaration, FunctionDeclaration, FunctionExpression, getLineAndCharacterOfPosition,
+    Identifier, InterfaceDeclaration, Node, NodeFlags, SourceFile, SyntaxKind, VariableStatement
 } from 'typescript'
 import { IPlugin } from '../IPlugin';
-import { ExportsController, IFunctionExport, IVariableExport } from './exportsController';
+import {
+    ExportsController, IClassExport, IEnumExport, IFunctionExport, IInterfaceExport,
+    IVariableExport
+} from './exportsController';
 
 
 export class ExportsParser implements IPlugin {
@@ -31,17 +34,25 @@ export class ExportsParser implements IPlugin {
         switch (node.kind) {
             case SyntaxKind.FunctionDeclaration:
             case SyntaxKind.FunctionExpression:
-                this.parseFunctionDeclaration(<FunctionDeclaration>node);
+                this.parseFunctionDeclaration(<FunctionDeclaration | FunctionExpression>node);
                 break;
             case SyntaxKind.VariableDeclaration:
             case SyntaxKind.VariableStatement:
                 this.parseVariableDeclaration(<VariableStatement>node);
                 break;
-
+            case SyntaxKind.ClassDeclaration:
+                this.parseClassDeclaration(<ClassDeclaration>node);
+                break;
+            case SyntaxKind.InterfaceDeclaration:
+                this.parseInterfaceDeclaration(<InterfaceDeclaration>node);
+                break;
+            case SyntaxKind.EnumDeclaration:
+                this.parseEnumDeclaration(<EnumDeclaration>node);
+                break;
         }
     }
 
-    parseFunctionDeclaration(node: FunctionDeclaration): void {
+    parseFunctionDeclaration(node: FunctionDeclaration | FunctionExpression): void {
         const functionDeclaration: IFunctionExport = {
             name: (<Identifier>node.name).text,
             type: SyntaxKind[node.kind],
@@ -49,8 +60,8 @@ export class ExportsParser implements IPlugin {
             line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
         };
         node.decorators.forEach(value => {
-            console.log((<Identifier>(<CallExpression>value.expression).expression).text);
-            console.log((<CallExpression>value.expression).arguments)
+            // console.log((<Identifier>(<CallExpression>value.expression).expression).text);
+            // console.log((<CallExpression>value.expression).arguments);
         });
         this.exportsController.addDeclarationToMap(functionDeclaration)
     }
@@ -70,6 +81,39 @@ export class ExportsParser implements IPlugin {
             })
         }
 
+    }
+
+    parseInterfaceDeclaration(node: InterfaceDeclaration): void {
+        const interfaceExport: IInterfaceExport = {
+            name: (<Identifier>node.name).text,
+            type: SyntaxKind[node.kind],
+            file: this.sourceFile.fileName,
+            line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+            membersLen: node.members.length,
+        };
+        this.exportsController.addDeclarationToMap(interfaceExport);
+    }
+
+    parseClassDeclaration(node: ClassDeclaration): void {
+        const classExport: IClassExport = {
+            name: (<Identifier>node.name).text,
+            type: SyntaxKind[node.kind],
+            file: this.sourceFile.fileName,
+            line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+            membersLen: node.members.length - 1,
+        };
+        this.exportsController.addDeclarationToMap(classExport);
+    }
+
+    parseEnumDeclaration(node: EnumDeclaration): void {
+        const enumExport: IEnumExport = {
+            name: (<Identifier>node.name).text,
+            type: SyntaxKind[node.kind],
+            file: this.sourceFile.fileName,
+            line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+            membersLen: node.members.length - 1,
+        };
+        this.exportsController.addDeclarationToMap(enumExport);
     }
 
     print(): void {

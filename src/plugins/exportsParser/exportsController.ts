@@ -14,6 +14,18 @@ export interface IVariableExport extends IExportDeclaration {
     variableType?: any;
 }
 
+export interface IInterfaceExport extends IExportDeclaration {
+    membersLen: number
+}
+
+export interface IClassExport extends IInterfaceExport {
+    isAngular?: boolean
+}
+
+export interface IEnumExport extends IExportDeclaration {
+    membersLen: number;
+}
+
 export class ExportsController {
 
     private exportsMap: Map<string, IExportDeclaration> = new Map<string, IExportDeclaration>();

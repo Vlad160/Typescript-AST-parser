@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import * as ts from 'typescript';
 
-@CustomDecorator('hui')
+@CustomDecorator({ selector: 'test-selector', styleUrls: ['styles.scss'] })
 export function delit(sourceFile: ts.SourceFile) {
 
     delintNode(sourceFile);
@@ -36,3 +36,15 @@ const b: Foo = { a: 'a' };
 
 const node: ts.NodeArray<ts.Node> = [];
 export let testVar: string = 'some shit';
+
+export interface ITestInteface {
+    foo: string;
+    bar: number;
+}
+
+export class Test {
+    private foo: string = 'bar';
+
+    constructor() {
+    }
+}
