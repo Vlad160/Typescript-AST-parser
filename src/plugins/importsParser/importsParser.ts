@@ -1,32 +1,36 @@
 import { IPlugin } from '../IPlugin';
-import * as ts from 'typescript';
 import { IComponent, IImportComponent, PackageController } from './packageController';
+import {
+    getLineAndCharacterOfPosition, Identifier, ImportDeclaration, ImportSpecifier, isImportSpecifier,
+    isNamespaceImport, NamespaceImport, Node, PropertyAccessExpression, QualifiedName, SourceFile, StringLiteral,
+    SyntaxKind
+} from 'typescript';
 
 export class ImportsParser implements IPlugin {
 
     private packageController = new PackageController();
 
-    constructor(private sourceFile: ts.SourceFile) {
+    constructor(private sourceFile: SourceFile) {
 
     }
 
-    parse(node: ts.Node): void {
+    parse(node: Node): void {
 
         switch (node.kind) {
-            case ts.SyntaxKind.ImportDeclaration: {
-                this.parseImportDeclaration(<ts.ImportDeclaration>node);
+            case SyntaxKind.ImportDeclaration: {
+                this.parseImportDeclaration(<ImportDeclaration>node);
                 break;
             }
-            case ts.SyntaxKind.Identifier: {
-                this.parseIdentifier(<ts.Identifier>node);
+            case SyntaxKind.Identifier: {
+                this.parseIdentifier(<Identifier>node);
                 break;
             }
-            case  ts.SyntaxKind.QualifiedName: {
-                this.parseQualifiedName(<ts.QualifiedName>node);
+            case  SyntaxKind.QualifiedName: {
+                this.parseQualifiedName(<QualifiedName>node);
                 break;
             }
-            case ts.SyntaxKind.PropertyAccessExpression: {
-                this.parsePropertyAccessExpression(<ts.PropertyAccessExpression>node);
+            case SyntaxKind.PropertyAccessExpression: {
+                this.parsePropertyAccessExpression(<PropertyAccessExpression>node);
                 break;
             }
         }
@@ -37,9 +41,9 @@ export class ImportsParser implements IPlugin {
         this.packageController.print();
     }
 
-    parseImportDeclaration(node: ts.ImportDeclaration): void {
-        if (node.importClause && ts.isNamespaceImport(node.importClause.namedBindings)) {
-            this.parseNamespaceImport(<ts.ImportDeclaration>node);
+    parseImportDeclaration(node: ImportDeclaration): void {
+        if (node.importClause && isNamespaceImport(node.importClause.namedBindings)) {
+            this.parseNamespaceImport(<ImportDeclaration>node);
         }
         if (node.importClause) {
             this.parseImportClause(node);
@@ -48,9 +52,9 @@ export class ImportsParser implements IPlugin {
         }
     }
 
-    parseNamespaceImport(node: ts.ImportDeclaration): void {
-        let packageName = <ts.StringLiteral>node.moduleSpecifier;
-        const alias = <ts.Identifier>(<ts.NamespaceImport>node.importClause.namedBindings).name;
+    parseNamespaceImport(node: ImportDeclaration): void {
+        let packageName = <StringLiteral>node.moduleSpecifier;
+        const alias = <Identifier>(<NamespaceImport>node.importClause.namedBindings).name;
         this.packageController.addComponentToMap({
             componentName: alias.text,
             packageName: packageName.text,
@@ -59,11 +63,11 @@ export class ImportsParser implements IPlugin {
         });
     }
 
-    parseImportClause(node: ts.ImportDeclaration) {
-        let packageName: string = (<ts.StringLiteral>node.moduleSpecifier).text;
+    parseImportClause(node: ImportDeclaration) {
+        let packageName: string = (<StringLiteral>node.moduleSpecifier).text;
         node.importClause.namedBindings.forEachChild(node => {
-            if (ts.isImportSpecifier(node)) {
-                const componentName = (<ts.ImportSpecifier>node).name.text;
+            if (isImportSpecifier(node)) {
+                const componentName = (<ImportSpecifier>node).name.text;
                 const component: IImportComponent = { packageName, componentName };
                 if (node.propertyName) {
                     component.aliasName = node.propertyName.getText();
@@ -73,8 +77,8 @@ export class ImportsParser implements IPlugin {
         });
     }
 
-    parseStringImport(node: ts.ImportDeclaration) {
-        const lib = <ts.StringLiteral>node.moduleSpecifier;
+    parseStringImport(node: ImportDeclaration) {
+        const lib = <StringLiteral>node.moduleSpecifier;
         const component = lib.text.split('/');
         this.packageController.addComponentToMap({
             componentName: component[component.length - 1],
@@ -82,7 +86,7 @@ export class ImportsParser implements IPlugin {
         })
     }
 
-    parseIdentifier(node: ts.Identifier): void {
+    parseIdentifier(node: Identifier): void {
         const componentFromMap
             = this.packageController.getComponentOrUndefinedFromMap(<string>node.escapedText);
         if (componentFromMap) {
@@ -91,7 +95,7 @@ export class ImportsParser implements IPlugin {
             }
             const component: IComponent = {
                 componentName: node.text,
-                line: ts.getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+                line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
                 file: this.sourceFile.fileName,
                 packageName: componentFromMap.packageName
             };
@@ -102,13 +106,13 @@ export class ImportsParser implements IPlugin {
         }
     }
 
-    parsePropertyAccessExpression(node: ts.PropertyAccessExpression): void {
+    parsePropertyAccessExpression(node: PropertyAccessExpression): void {
         const componentFromMap =
             this.packageController.getComponentOrUndefinedFromMap(<string>node.expression['escapedText']);
         if (componentFromMap) {
             const component: IComponent = {
                 componentName: <string>node.name.escapedText,
-                line: ts.getLineAndCharacterOfPosition(this.sourceFile, node.expression.pos).line + 1,
+                line: getLineAndCharacterOfPosition(this.sourceFile, node.expression.pos).line + 1,
                 file: this.sourceFile.fileName,
                 packageName: componentFromMap.packageName,
             };
@@ -119,13 +123,13 @@ export class ImportsParser implements IPlugin {
         }
     }
 
-    parseQualifiedName(node: ts.QualifiedName): void {
+    parseQualifiedName(node: QualifiedName): void {
         const componentFromMap =
-            this.packageController.getComponentOrUndefinedFromMap(<string>node.left['escapedText']);
+            this.packageController.getComponentOrUndefinedFromMap((<Identifier>node.left).text);
         if (componentFromMap) {
             const component: IComponent = {
                 componentName: <string>node.right.escapedText,
-                line: ts.getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+                line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
                 file: this.sourceFile.fileName,
                 packageName: componentFromMap.packageName,
             };

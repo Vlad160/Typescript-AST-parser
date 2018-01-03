@@ -1,16 +1,16 @@
-import * as ts from 'typescript';
+import { createSourceFile, forEachChild, Node, ScriptTarget, SourceFile } from 'typescript';
 import { readFileSync } from 'fs';
 import { ImportsParser } from '../plugins/importsParser/importsParser';
 import { ExportsParser } from '../plugins/exportsParser/exportsParser';
 
 export class TsParser {
-    private readonly sourceFile: ts.SourceFile;
+    private readonly sourceFile: SourceFile;
     private importsParser: ImportsParser;
     private exportsParser: ExportsParser;
 
     constructor(file: string) {
 
-        this.sourceFile = ts.createSourceFile(file, readFileSync(file).toString(), ts.ScriptTarget.ES2015, true);
+        this.sourceFile = createSourceFile(file, readFileSync(file).toString(), ScriptTarget.ES2015, true);
         this.importsParser = new ImportsParser(this.sourceFile);
         this.exportsParser = new ExportsParser(this.sourceFile);
     }
@@ -21,9 +21,9 @@ export class TsParser {
         this.exportsParser.print();
     }
 
-    parseNode(node: ts.Node) {
+    parseNode(node: Node) {
         this.importsParser.parse(node);
         this.exportsParser.parse(node);
-        ts.forEachChild(node, this.parseNode.bind(this));
+        forEachChild(node, this.parseNode.bind(this));
     }
 }

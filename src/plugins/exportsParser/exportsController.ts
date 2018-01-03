@@ -15,11 +15,12 @@ export interface IVariableExport extends IExportDeclaration {
 }
 
 export interface IInterfaceExport extends IExportDeclaration {
-    membersLen: number
+    membersLen: number;
 }
 
 export interface IClassExport extends IInterfaceExport {
-    isAngular?: boolean
+    isAngular?: boolean;
+    selector?: string;
 }
 
 export interface IEnumExport extends IExportDeclaration {

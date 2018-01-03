@@ -1,17 +1,15 @@
 {
   "name": "ast_parser",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Typscript parser for packages and products",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Uladzislau Nestser",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^8.5.2",
-    "ts-loader": "^3.2.0",
-    "typescript": "^2.6.2",
-    "webpack": "^3.10.0"
+    "typescript": "^2.6.2"
   }
 }

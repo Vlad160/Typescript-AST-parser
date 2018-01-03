@@ -7,14 +7,17 @@ import {
     ExportsController, IClassExport, IEnumExport, IFunctionExport, IInterfaceExport,
     IVariableExport
 } from './exportsController';
+import { DecoratorsParser } from './decoratorsParser';
 
 
 export class ExportsParser implements IPlugin {
 
     private exportsController: ExportsController;
+    private decoratorsParser: DecoratorsParser;
 
     constructor(private sourceFile: SourceFile) {
         this.exportsController = new ExportsController();
+        this.decoratorsParser = new DecoratorsParser();
     }
 
     parse(node: Node): void {
@@ -29,8 +32,6 @@ export class ExportsParser implements IPlugin {
     }
 
     parseExportKeyword(node: any): void {
-        // Temp workaround
-
         switch (node.kind) {
             case SyntaxKind.FunctionDeclaration:
             case SyntaxKind.FunctionExpression:
@@ -53,17 +54,18 @@ export class ExportsParser implements IPlugin {
     }
 
     parseFunctionDeclaration(node: FunctionDeclaration | FunctionExpression): void {
-        const functionDeclaration: IFunctionExport = {
+        const functionExport: IFunctionExport = {
             name: (<Identifier>node.name).text,
             type: SyntaxKind[node.kind],
             file: this.sourceFile.fileName,
             line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
         };
-        node.decorators.forEach(value => {
-            // console.log((<Identifier>(<CallExpression>value.expression).expression).text);
-            // console.log((<CallExpression>value.expression).arguments);
-        });
-        this.exportsController.addDeclarationToMap(functionDeclaration)
+        if (node.decorators) {
+            node.decorators.forEach(value => {
+                this.decoratorsParser.addDecoratorsMetadata(functionExport, value);
+            });
+        }
+        this.exportsController.addDeclarationToMap(functionExport)
     }
 
     parseVariableDeclaration(node: VariableStatement): void {
@@ -102,6 +104,11 @@ export class ExportsParser implements IPlugin {
             line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
             membersLen: node.members.length - 1,
         };
+        if (node.decorators) {
+            node.decorators.forEach(value => {
+                this.decoratorsParser.addDecoratorsMetadata(classExport, value);
+            });
+        }
         this.exportsController.addDeclarationToMap(classExport);
     }
 
