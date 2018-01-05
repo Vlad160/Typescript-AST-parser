@@ -26,7 +26,7 @@ export class Generator {
         const t0 = Date.now();
         const packageReport: INpmPackage[] = [];
         const packagesFolders = fs.readdirSync(this.packagesPath);
-        console.log(packagesFolders.length);
+        console.log(`${packagesFolders.length} to analyze`);
         await Promise.all(packagesFolders.map(async (folder) => {
             packageReport.push(await this.getReportForPackage(folder));
         }));

@@ -9,6 +9,10 @@ export function isAngularDecorator(decoratorName: string): boolean {
 
 }
 
+export function isCustomComponent(decoratorName: string): boolean {
+    return decoratorName === 'customElement';
+}
+
 export function detectAngularType(decoratorName: string): string | undefined {
     return angularDecorators.find(value => value === decoratorName);
 }

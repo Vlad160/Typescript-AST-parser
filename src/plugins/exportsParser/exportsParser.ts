@@ -37,6 +37,7 @@ export class ExportsParser implements IPlugin {
             case SyntaxKind.ExportSpecifier:
             case SyntaxKind.NamedExports:
                 this.parseExportKeyword(node.parent);
+                break;
         }
     }
 
@@ -67,7 +68,7 @@ export class ExportsParser implements IPlugin {
             name: (<Identifier>node.name ? (<Identifier>node.name).text : 'Anonymous'),
             type: SyntaxKind[node.kind],
             file: this.sourceFile.fileName,
-            line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+            line: getLineAndCharacterOfPosition(this.sourceFile, node.getStart()).line + 1,
         };
         if (node.decorators) {
             node.decorators.forEach(value => {
@@ -99,7 +100,7 @@ export class ExportsParser implements IPlugin {
             name: (<Identifier>node.name).text,
             type: SyntaxKind[node.kind],
             file: this.sourceFile.fileName,
-            line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+            line: getLineAndCharacterOfPosition(this.sourceFile, node.getStart()).line + 1,
             membersLen: node.members.length,
         };
         this.exportsController.addDeclarationToMap(interfaceExport);
@@ -110,7 +111,7 @@ export class ExportsParser implements IPlugin {
             name: (<Identifier>node.name).text,
             type: SyntaxKind[node.kind],
             file: this.sourceFile.fileName,
-            line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+            line: getLineAndCharacterOfPosition(this.sourceFile, node.getStart()).line + 1,
             membersLen: node.members.length - 1,
         };
         if (node.decorators) {
@@ -126,7 +127,7 @@ export class ExportsParser implements IPlugin {
             name: (<Identifier>node.name).text,
             type: SyntaxKind[node.kind],
             file: this.sourceFile.fileName,
-            line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
+            line: getLineAndCharacterOfPosition(this.sourceFile, node.getStart()).line + 1,
             membersLen: node.members.length - 1,
         };
         this.exportsController.addDeclarationToMap(enumExport);
