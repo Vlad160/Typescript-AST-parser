@@ -1,29 +1,36 @@
-import { createSourceFile, forEachChild, Node, ScriptTarget, SourceFile } from 'typescript';
+import { createSourceFile, forEachChild, Node, ScriptTarget, SourceFile, } from 'typescript';
 import { readFileSync } from 'fs';
-import { ImportsParser } from '../plugins/importsParser/importsParser';
-import { ExportsParser } from '../plugins/exportsParser/exportsParser';
+import { IPlugin } from '../plugins/IPlugin';
 
 export class TsParser {
-    private readonly sourceFile: SourceFile;
-    private importsParser: ImportsParser;
-    private exportsParser: ExportsParser;
+    private _sourceFile: SourceFile;
+    private plugins: IPlugin[];
 
-    constructor(file: string) {
+    constructor(file?: string, ...plugins: IPlugin[]) {
 
-        this.sourceFile = createSourceFile(file, readFileSync(file).toString(), ScriptTarget.ES2015, true);
-        this.importsParser = new ImportsParser(this.sourceFile);
-        this.exportsParser = new ExportsParser(this.sourceFile);
+        if (file) {
+            this._sourceFile = createSourceFile(file, readFileSync(file).toString(), ScriptTarget.ES2015, true);
+            this.plugins.forEach((plugin: IPlugin) => plugin.sourceFile = this._sourceFile);
+        }
+        this.plugins = plugins;
     }
 
+    set sourceFile(file: string) {
+        this._sourceFile = createSourceFile(file, readFileSync(file).toString(), ScriptTarget.ES2015, true);
+    }
+
+
     traverse() {
-        this.parseNode(this.sourceFile);
-        this.importsParser.print();
-        this.exportsParser.print();
+        this.plugins.forEach((plugin: IPlugin) => plugin.sourceFile = this._sourceFile);
+        this.parseNode(this._sourceFile);
     }
 
     parseNode(node: Node) {
-        this.importsParser.parse(node);
-        this.exportsParser.parse(node);
+        this.plugins.forEach((plugin: IPlugin) => plugin.parse(node));
         forEachChild(node, this.parseNode.bind(this));
+    }
+
+    getReport(): any[] {
+        return this.plugins.map((plugin: IPlugin) => plugin.print());
     }
 }

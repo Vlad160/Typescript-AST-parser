@@ -14,10 +14,19 @@ export class ExportsParser implements IPlugin {
 
     private exportsController: ExportsController;
     private decoratorsParser: DecoratorsParser;
+    private _sourceFile: SourceFile;
 
-    constructor(private sourceFile: SourceFile) {
+    constructor() {
         this.exportsController = new ExportsController();
         this.decoratorsParser = new DecoratorsParser();
+    }
+
+    set sourceFile(sourceFile: SourceFile) {
+        this._sourceFile = sourceFile;
+    }
+
+    get sourceFile(): SourceFile {
+        return this._sourceFile;
     }
 
     parse(node: Node): void {
@@ -55,7 +64,7 @@ export class ExportsParser implements IPlugin {
 
     parseFunctionDeclaration(node: FunctionDeclaration | FunctionExpression): void {
         const functionExport: IFunctionExport = {
-            name: (<Identifier>node.name).text,
+            name: (<Identifier>node.name ? (<Identifier>node.name).text : 'Anonymous'),
             type: SyntaxKind[node.kind],
             file: this.sourceFile.fileName,
             line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
@@ -123,7 +132,7 @@ export class ExportsParser implements IPlugin {
         this.exportsController.addDeclarationToMap(enumExport);
     }
 
-    print(): void {
-        console.log(this.exportsController.print());
+    print(): any {
+        return this.exportsController.print();
     }
 }

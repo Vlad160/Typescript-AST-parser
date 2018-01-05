@@ -9,9 +9,14 @@ import {
 export class ImportsParser implements IPlugin {
 
     private packageController = new PackageController();
+    private _sourceFile: SourceFile;
 
-    constructor(private sourceFile: SourceFile) {
+    constructor() {
 
+    }
+
+    set sourceFile(sourceFile: SourceFile) {
+        this._sourceFile = sourceFile;
     }
 
     parse(node: Node): void {
@@ -111,7 +116,7 @@ export class ImportsParser implements IPlugin {
             this.packageController.getComponentOrUndefinedFromMap(<string>node.expression['escapedText']);
         if (componentFromMap) {
             const component: IComponent = {
-                componentName: <string>node.name.escapedText,
+                componentName: (<Identifier>node.name).text,
                 line: getLineAndCharacterOfPosition(this.sourceFile, node.expression.pos).line + 1,
                 file: this.sourceFile.fileName,
                 packageName: componentFromMap.packageName,
@@ -128,7 +133,7 @@ export class ImportsParser implements IPlugin {
             this.packageController.getComponentOrUndefinedFromMap((<Identifier>node.left).text);
         if (componentFromMap) {
             const component: IComponent = {
-                componentName: <string>node.right.escapedText,
+                componentName: (<Identifier>node.right).text,
                 line: getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1,
                 file: this.sourceFile.fileName,
                 packageName: componentFromMap.packageName,

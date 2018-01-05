@@ -41,11 +41,11 @@ export class ExportsController {
     }
 
     print(): string {
-        const report: any = { exports: [] };
+        const report: any = [];
         this.exportsMap.forEach((value, key) => {
-            report.exports.push({ [key]: value });
+            report.push({ [key]: value });
         });
-        return JSON.stringify(report, undefined, 4);
+        return report;
 
     }
 
